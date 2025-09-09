@@ -1,5 +1,6 @@
 import requests
 from flask import Flask, render_template
+import os
 
 app = Flask(__name__)
 
@@ -13,7 +14,7 @@ def get_crypto_prices():
     
     try:
         print("Fetching live crypto prices...")
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()
         
         data = response.json()
@@ -29,5 +30,13 @@ def index():
     crypto_data = get_crypto_prices()
     return render_template('index.html', data=crypto_data)
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for monitoring."""
+    return {"status": "healthy", "service": "KryptTracker"}
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Use environment port or default to 5000
+    port = int(os.environ.get('PORT', 5000))
+    # Bind to all interfaces and disable debug in production
+    app.run(host='0.0.0.0', port=port, debug=False)
