@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KryptTrack - Live Crypto Prices</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #121826;
+            --card-color: #1a2233;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --accent-color: #00aaff;
+            --usd-color: #27ae60;
+            --inr-color: #c780ff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-color);
+            padding: 20px 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 2.5em;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .crypto-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .crypto-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease-out forwards;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .crypto-item:last-child {
+            border-bottom: none;
+        }
+        
+        .crypto-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            transform: scale(1.02);
+            border-radius: 8px;
+        }
+
+        .crypto-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .crypto-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .crypto-name {
+            font-size: 1.4em;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .crypto-price {
+            text-align: right;
+        }
+
+        .price-usd {
+            color: var(--usd-color);
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .price-inr {
+            color: var(--inr-color);
+            font-size: 0.9em;
+            font-weight: 300;
+        }
+        
+        /* Staggered animation delay for each item */
+        .crypto-item:nth-child(1) { animation-delay: 0s; }
+        .crypto-item:nth-child(2) { animation-delay: 0.1s; }
+        .crypto-item:nth-child(3) { animation-delay: 0.2s; }
+        .crypto-item:nth-child(4) { animation-delay: 0.3s; }
+        .crypto-item:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Marquee styles */
+        .marquee-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-color);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            padding: 10px 0;
+        }
+
+        .marquee {
+            display: inline-block;
+            animation: scroll 15s linear infinite;
+            white-space: nowrap;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            font-weight: 400;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>KryptTrack</h1>
+        
+        <ul class="crypto-list">
+            {% if data %}
+                {% for crypto, prices in data.items() %}
+                    <li class="crypto-item">
+                        <div class="crypto-info">
+                            <!-- SVG icons for each cryptocurrency -->
+                            <img class="crypto-icon" src="https://s2.coinmarketcap.com/static/img/coins/64x64/{% if crypto == 'bitcoin' %}1{% elif crypto == 'ethereum' %}1027{% elif crypto == 'dogecoin' %}74{% elif crypto == 'cardano' %}2010{% elif crypto == 'solana' %}5426{% endif %}.png" alt="{{crypto}} icon">
+                            <span class="crypto-name">{{ crypto }}</span>
+                        </div>
+                        <div class="crypto-price">
+                            <div class="price-usd">${{ "{:,.2f}".format(prices.usd) }}</div>
+                            <div class="price-inr">₹{{ "{:,.2f}".format(prices.inr) }}</div>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="crypto-item">Data could not be loaded.</li>
+            {% endif %}
+        </ul>
+    </div>
+    
+    <div class="marquee-container">
+        <div class="marquee">
+            🔄 Refresh to see live prices • Real-time cryptocurrency data • Powered by CoinGecko API 🔄
+        </div>
+    </div>
+</body>
+</html>
