@@ -1,6 +1,6 @@
-# KryptTrack 🚀
+## KryptTrack 
 
-> **Live Cryptocurrency Price Tracker** - Real-time crypto prices in USD & INR
+**Live Cryptocurrency Price Tracker** - Real-time crypto prices in USD & INR
 
 A lightweight Flask web application that displays live cryptocurrency prices with a clean, modern interface.
 
