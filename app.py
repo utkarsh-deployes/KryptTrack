@@ -1,11 +1,27 @@
 import requests
 from flask import Flask, render_template
 import os
+import time
 
 app = Flask(__name__)
 
+# Simple in-memory cache
+cache = {
+    'data': None,
+    'timestamp': 0,
+    'cache_duration': 60  # Cache for 60 seconds
+}
+
 def get_crypto_prices():
-    """Fetches crypto prices from the CoinGecko API."""
+    """Fetches crypto prices from the CoinGecko API with caching."""
+    
+    current_time = time.time()
+    
+    # Return cached data if it's still fresh
+    if (cache['data'] is not None and 
+        current_time - cache['timestamp'] < cache['cache_duration']):
+        print("Returning cached data...")
+        return cache['data']
     
     coins = "bitcoin,ethereum,dogecoin,cardano,solana"
     currencies = "usd,inr"
@@ -19,11 +35,29 @@ def get_crypto_prices():
         
         data = response.json()
         print("Successfully fetched data.")
+        
+        # Update cache
+        cache['data'] = data
+        cache['timestamp'] = current_time
+        
         return data
 
     except requests.exceptions.RequestException as e:
         print(f"Could not fetch data from API: {e}")
-        return None
+        
+        # Return cached data if available, even if expired
+        if cache['data'] is not None:
+            print("Returning stale cached data due to API error...")
+            return cache['data']
+        
+        # Return sample data if no cache available
+        return {
+            "bitcoin": {"usd": 0, "inr": 0},
+            "ethereum": {"usd": 0, "inr": 0},
+            "dogecoin": {"usd": 0, "inr": 0},
+            "cardano": {"usd": 0, "inr": 0},
+            "solana": {"usd": 0, "inr": 0}
+        }
 
 @app.route('/')
 def index():
@@ -36,7 +70,5 @@ def health_check():
     return {"status": "healthy", "service": "KryptTracker"}
 
 if __name__ == '__main__':
-    # Use environment port or default to 5000
     port = int(os.environ.get('PORT', 5000))
-    # Bind to all interfaces and disable debug in production
     app.run(host='0.0.0.0', port=port, debug=False)
